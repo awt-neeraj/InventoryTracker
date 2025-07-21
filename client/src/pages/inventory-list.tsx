@@ -17,8 +17,8 @@ const categories = ["Electronics", "Furniture", "Stationery", "Kitchen", "Cleani
 
 export default function InventoryList() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [stockFilter, setStockFilter] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [stockFilter, setStockFilter] = useState("all");
 
   const { data: items, isLoading } = useQuery<Item[]>({
     queryKey: ["/api/items"],
@@ -38,11 +38,11 @@ export default function InventoryList() {
   const filteredItems = itemsWithInvoices.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.invoice?.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase());
+                         (item.invoice?.invoiceNumber && item.invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesCategory = !selectedCategory || item.category === selectedCategory;
+    const matchesCategory = !selectedCategory || selectedCategory === "all" || item.category === selectedCategory;
 
-    const matchesStock = !stockFilter ||
+    const matchesStock = !stockFilter || stockFilter === "all" ||
       (stockFilter === "low" && item.quantityAvailable < 5) ||
       (stockFilter === "available" && item.quantityAvailable >= 5) ||
       (stockFilter === "out" && item.quantityAvailable === 0);
@@ -52,8 +52,8 @@ export default function InventoryList() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedCategory("");
-    setStockFilter("");
+    setSelectedCategory("all");
+    setStockFilter("all");
   };
 
   const getStockStatus = (quantity: number) => {
@@ -116,7 +116,7 @@ export default function InventoryList() {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -132,7 +132,7 @@ export default function InventoryList() {
                   <SelectValue placeholder="All Items" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Items</SelectItem>
+                  <SelectItem value="all">All Items</SelectItem>
                   <SelectItem value="low">Low Stock (&lt; 5)</SelectItem>
                   <SelectItem value="available">Available (≥ 5)</SelectItem>
                   <SelectItem value="out">Out of Stock</SelectItem>

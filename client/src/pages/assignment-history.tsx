@@ -14,7 +14,7 @@ interface AssignmentWithItem extends Assignment {
 
 export default function AssignmentHistory() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
 
   const { data: assignments, isLoading: assignmentsLoading } = useQuery<Assignment[]>({
     queryKey: ["/api/assignments"],
@@ -37,7 +37,7 @@ export default function AssignmentHistory() {
       assignment.assignedTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       assignment.reason?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesDate = !dateFilter || (() => {
+    const matchesDate = !dateFilter || dateFilter === "all" || (() => {
       const assignmentDate = new Date(assignment.assignmentDate);
       const now = new Date();
       
@@ -63,7 +63,7 @@ export default function AssignmentHistory() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setDateFilter("");
+    setDateFilter("all");
   };
 
   const formatDate = (dateString: string) => {
@@ -124,7 +124,7 @@ export default function AssignmentHistory() {
                   <SelectValue placeholder="All Time" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Time</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
                   <SelectItem value="today">Today</SelectItem>
                   <SelectItem value="week">This Week</SelectItem>
                   <SelectItem value="month">This Month</SelectItem>
