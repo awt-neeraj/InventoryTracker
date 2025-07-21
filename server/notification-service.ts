@@ -128,7 +128,7 @@ export class NotificationService {
             const notification: InsertNotification = {
               type: 'invoice_approval',
               title: 'High-Value Invoice',
-              message: `Invoice ${invoice.invoiceNumber} from ${invoice.vendorName} has a total value of $${totalValue.toFixed(2)}. Consider review process.`,
+              message: `Invoice ${invoice.invoiceNumber} from ${invoice.vendorName} has a total value of ₹${totalValue.toFixed(2)}. Consider review process.`,
               priority: totalValue > 5000 ? 'high' : 'medium',
               relatedId: invoice.id,
             };

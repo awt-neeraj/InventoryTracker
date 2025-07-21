@@ -28,17 +28,22 @@ const addItemsSchema = z.object({
 
 type AddItemsForm = z.infer<typeof addItemsSchema>;
 
-const categories = [
+const defaultCategories = [
   "Electronics",
   "Furniture", 
   "Stationery",
   "Kitchen",
   "Cleaning",
+  "Medical Equipment",
+  "Tools",
+  "Safety Equipment",
+  "Office Supplies",
   "Other"
 ];
 
 export default function AddItems() {
   const { toast } = useToast();
+  const [customCategory, setCustomCategory] = useState("");
 
   const form = useForm<AddItemsForm>({
     resolver: zodResolver(addItemsSchema),
@@ -172,7 +177,7 @@ export default function AddItems() {
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Item Name</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Category</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Unit Price</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Unit Price (₹)</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total</th>
                         <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Actions</th>
                       </tr>
@@ -197,23 +202,38 @@ export default function AddItems() {
                               />
                             </td>
                             <td className="px-4 py-3">
-                              <Select
-                                value={form.watch(`items.${index}.category`)}
-                                onValueChange={(value) => 
-                                  form.setValue(`items.${index}.category`, value)
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {categories.map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                      {category}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <div className="space-y-2">
+                                <Select
+                                  value={form.watch(`items.${index}.category`)}
+                                  onValueChange={(value) => {
+                                    if (value === "custom") {
+                                      // Don't set value yet, let user type custom
+                                      return;
+                                    }
+                                    form.setValue(`items.${index}.category`, value);
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select or type custom..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {defaultCategories.map((category) => (
+                                      <SelectItem key={category} value={category}>
+                                        {category}
+                                      </SelectItem>
+                                    ))}
+                                    <SelectItem value="custom">+ Add Custom Category</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  placeholder="Or type custom category..."
+                                  value={form.watch(`items.${index}.category`) && !defaultCategories.includes(form.watch(`items.${index}.category`)) ? form.watch(`items.${index}.category`) : ""}
+                                  onChange={(e) => {
+                                    form.setValue(`items.${index}.category`, e.target.value);
+                                  }}
+                                  className="text-sm"
+                                />
+                              </div>
                             </td>
                             <td className="px-4 py-3">
                               <Input
@@ -247,7 +267,7 @@ export default function AddItems() {
                               />
                             </td>
                             <td className="px-4 py-3">
-                              <span className="font-medium text-gray-900">${total}</span>
+                              <span className="font-medium text-gray-900">₹{total}</span>
                             </td>
                             <td className="px-4 py-3 text-center">
                               {fields.length > 1 && (

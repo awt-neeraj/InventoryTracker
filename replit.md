@@ -92,9 +92,13 @@ The architecture prioritizes developer experience with hot reloading in developm
 
 ## Recent Changes
 
-### January 21, 2025 - Database Integration
+### January 21, 2025 - Database Integration & Smart Notifications
 - **Added PostgreSQL Database**: Migrated from in-memory storage to persistent PostgreSQL database
 - **Database Schema**: Created tables for invoices, items, and assignments with proper relationships
 - **Drizzle Relations**: Implemented explicit relations between invoices → items → assignments
 - **Storage Layer Update**: Replaced MemStorage with DatabaseStorage implementing the IStorage interface
 - **Data Persistence**: All inventory data now persists between server restarts
+- **Smart Notifications**: Added notification system with automatic alerts for low stock, reorder suggestions, assignment reminders, and invoice approval workflows
+- **Custom Categories**: Enhanced category selection with ability to add custom categories beyond default options
+- **Indian Rupee Currency**: Updated all currency displays from USD ($) to Indian Rupee (₹)
+- **ASI Branding**: Changed application name from "Inventory Manager" to "ASI Inventory" as requested

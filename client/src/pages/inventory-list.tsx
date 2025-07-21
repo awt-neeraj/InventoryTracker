@@ -170,7 +170,7 @@ export default function InventoryList() {
                   Assigned
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Unit Price
+                  Unit Price (₹)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -228,7 +228,7 @@ export default function InventoryList() {
                         {assignedQuantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${item.unitPrice.toFixed(2)}
+                        ₹{item.unitPrice.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Button variant="ghost" size="sm" className="mr-2">
