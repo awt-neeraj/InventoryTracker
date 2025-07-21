@@ -9,6 +9,8 @@ import {
   type InsertItem, 
   type InsertAssignment 
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Invoice operations
@@ -110,4 +112,79 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async createInvoice(insertInvoice: InsertInvoice): Promise<Invoice> {
+    const [invoice] = await db
+      .insert(invoices)
+      .values({
+        ...insertInvoice,
+        fileName: insertInvoice.fileName || null,
+        filePath: insertInvoice.filePath || null,
+      })
+      .returning();
+    return invoice;
+  }
+
+  async getInvoices(): Promise<Invoice[]> {
+    return await db.select().from(invoices);
+  }
+
+  async getInvoiceById(id: number): Promise<Invoice | undefined> {
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id));
+    return invoice || undefined;
+  }
+
+  async createItem(insertItem: InsertItem): Promise<Item> {
+    const [item] = await db
+      .insert(items)
+      .values({
+        ...insertItem,
+        quantityAvailable: insertItem.quantityPurchased,
+      })
+      .returning();
+    return item;
+  }
+
+  async getItems(): Promise<Item[]> {
+    return await db.select().from(items);
+  }
+
+  async getItemById(id: number): Promise<Item | undefined> {
+    const [item] = await db.select().from(items).where(eq(items.id, id));
+    return item || undefined;
+  }
+
+  async getItemsByInvoiceId(invoiceId: number): Promise<Item[]> {
+    return await db.select().from(items).where(eq(items.invoiceId, invoiceId));
+  }
+
+  async updateItemQuantity(id: number, quantityAvailable: number): Promise<Item | undefined> {
+    const [item] = await db
+      .update(items)
+      .set({ quantityAvailable })
+      .where(eq(items.id, id))
+      .returning();
+    return item || undefined;
+  }
+
+  async createAssignment(insertAssignment: InsertAssignment): Promise<Assignment> {
+    const [assignment] = await db
+      .insert(assignments)
+      .values({
+        ...insertAssignment,
+        reason: insertAssignment.reason || null,
+      })
+      .returning();
+    return assignment;
+  }
+
+  async getAssignments(): Promise<Assignment[]> {
+    return await db.select().from(assignments);
+  }
+
+  async getAssignmentsByItemId(itemId: number): Promise<Assignment[]> {
+    return await db.select().from(assignments).where(eq(assignments.itemId, itemId));
+  }
+}
+
+export const storage = new DatabaseStorage();

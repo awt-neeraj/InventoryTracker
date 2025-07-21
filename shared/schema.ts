@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, real, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -29,6 +30,26 @@ export const assignments = pgTable("assignments", {
   reason: text("reason"),
   assignmentDate: text("assignment_date").notNull(),
 });
+
+// Relations
+export const invoicesRelations = relations(invoices, ({ many }) => ({
+  items: many(items),
+}));
+
+export const itemsRelations = relations(items, ({ one, many }) => ({
+  invoice: one(invoices, {
+    fields: [items.invoiceId],
+    references: [invoices.id],
+  }),
+  assignments: many(assignments),
+}));
+
+export const assignmentsRelations = relations(assignments, ({ one }) => ({
+  item: one(items, {
+    fields: [assignments.itemId],
+    references: [items.id],
+  }),
+}));
 
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,

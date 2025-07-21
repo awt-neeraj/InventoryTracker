@@ -43,8 +43,8 @@ The application follows a full-stack architecture with clear separation between 
 - **Assignment History**: Historical assignment records
 
 ### Storage Layer
-- **Database Storage**: PostgreSQL with Drizzle ORM for production
-- **Memory Storage**: In-memory storage implementation for development/testing
+- **Database Storage**: PostgreSQL with Drizzle ORM (currently active)
+- **Memory Storage**: In-memory storage implementation (available for development/testing)
 - **File Storage**: Local filesystem for invoice file uploads
 
 ## Data Flow
@@ -89,3 +89,12 @@ The application follows a full-stack architecture with clear separation between 
 - `npm run db:push`: Apply database schema changes
 
 The architecture prioritizes developer experience with hot reloading in development, type safety throughout the stack, and a clean separation of concerns between data access, business logic, and presentation layers.
+
+## Recent Changes
+
+### January 21, 2025 - Database Integration
+- **Added PostgreSQL Database**: Migrated from in-memory storage to persistent PostgreSQL database
+- **Database Schema**: Created tables for invoices, items, and assignments with proper relationships
+- **Drizzle Relations**: Implemented explicit relations between invoices → items → assignments
+- **Storage Layer Update**: Replaced MemStorage with DatabaseStorage implementing the IStorage interface
+- **Data Persistence**: All inventory data now persists between server restarts
