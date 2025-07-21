@@ -10,6 +10,7 @@ import AddItems from "@/pages/add-items";
 import InventoryList from "@/pages/inventory-list";
 import AssignItem from "@/pages/assign-item";
 import AssignmentHistory from "@/pages/assignment-history";
+import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/inventory" component={InventoryList} />
           <Route path="/assign" component={AssignItem} />
           <Route path="/history" component={AssignmentHistory} />
+          <Route path="/notifications" component={Notifications} />
           <Route component={NotFound} />
         </Switch>
       </main>

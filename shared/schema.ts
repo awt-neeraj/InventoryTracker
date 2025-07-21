@@ -51,6 +51,26 @@ export const assignmentsRelations = relations(assignments, ({ one }) => ({
   }),
 }));
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // 'low_stock', 'reorder_suggestion', 'assignment_reminder', 'invoice_approval'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  priority: text("priority").notNull().default("medium"), // 'low', 'medium', 'high', 'urgent'
+  isRead: integer("is_read").notNull().default(0), // 0 = unread, 1 = read
+  relatedId: integer("related_id"), // ID of related item/invoice/assignment
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Insert/Select schemas for notifications
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
 export const insertInvoiceSchema = createInsertSchema(invoices).omit({
   id: true,
 });

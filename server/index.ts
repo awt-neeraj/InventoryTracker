@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { NotificationService } from "./notification-service";
 
 const app = express();
 app.use(express.json());
@@ -67,5 +68,15 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Run notification checks every 30 minutes
+    setInterval(async () => {
+      await NotificationService.runAllChecks();
+    }, 30 * 60 * 1000);
+    
+    // Run initial notification check after 10 seconds
+    setTimeout(async () => {
+      await NotificationService.runAllChecks();
+    }, 10000);
   });
 })();

@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { 
   BarChart3, 
   Upload, 
@@ -7,8 +8,11 @@ import {
   UserPlus, 
   History,
   Package,
+  Bell,
   User
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import type { Notification } from "@shared/schema";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
@@ -21,6 +25,11 @@ const navigation = [
 
 export default function Sidebar() {
   const [location] = useLocation();
+
+  const { data: unreadNotifications = [] } = useQuery<Notification[]>({
+    queryKey: ["/api/notifications/unread"],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   return (
     <nav className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
@@ -53,6 +62,28 @@ export default function Sidebar() {
               </li>
             );
           })}
+          
+          {/* Notifications item with badge */}
+          <li>
+            <Link
+              href="/notifications"
+              className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                location === "/notifications"
+                  ? "sidebar-active text-primary"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex items-center">
+                <Bell className="mr-3 w-5 h-5" />
+                Notifications
+              </div>
+              {unreadNotifications.length > 0 && (
+                <Badge variant="destructive" className="h-5 w-5 p-0 text-xs">
+                  {unreadNotifications.length}
+                </Badge>
+              )}
+            </Link>
+          </li>
         </ul>
       </div>
       

@@ -2,15 +2,18 @@ import {
   invoices, 
   items, 
   assignments,
+  notifications,
   type Invoice, 
   type Item, 
   type Assignment,
+  type Notification,
   type InsertInvoice, 
   type InsertItem, 
-  type InsertAssignment 
+  type InsertAssignment,
+  type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, lt } from "drizzle-orm";
 
 export interface IStorage {
   // Invoice operations
@@ -29,6 +32,13 @@ export interface IStorage {
   createAssignment(assignment: InsertAssignment): Promise<Assignment>;
   getAssignments(): Promise<Assignment[]>;
   getAssignmentsByItemId(itemId: number): Promise<Assignment[]>;
+  
+  // Notification methods
+  createNotification(insertNotification: InsertNotification): Promise<Notification>;
+  getNotifications(): Promise<Notification[]>;
+  getUnreadNotifications(): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<Notification | undefined>;
+  markAllNotificationsAsRead(): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -110,6 +120,33 @@ export class MemStorage implements IStorage {
   async getAssignmentsByItemId(itemId: number): Promise<Assignment[]> {
     return Array.from(this.assignments.values()).filter(assignment => assignment.itemId === itemId);
   }
+
+  // Notification methods (placeholder for MemStorage)
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const notification: Notification = {
+      id: Date.now(),
+      ...insertNotification,
+      isRead: 0,
+      createdAt: new Date(),
+    };
+    return notification;
+  }
+
+  async getNotifications(): Promise<Notification[]> {
+    return [];
+  }
+
+  async getUnreadNotifications(): Promise<Notification[]> {
+    return [];
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification | undefined> {
+    return undefined;
+  }
+
+  async markAllNotificationsAsRead(): Promise<void> {
+    return;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -184,6 +221,44 @@ export class DatabaseStorage implements IStorage {
 
   async getAssignmentsByItemId(itemId: number): Promise<Assignment[]> {
     return await db.select().from(assignments).where(eq(assignments.itemId, itemId));
+  }
+
+  // Notification methods
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values({
+        ...insertNotification,
+        relatedId: insertNotification.relatedId || null,
+      })
+      .returning();
+    return notification;
+  }
+
+  async getNotifications(): Promise<Notification[]> {
+    return await db.select().from(notifications).orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadNotifications(): Promise<Notification[]> {
+    return await db.select().from(notifications)
+      .where(eq(notifications.isRead, 0))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification | undefined> {
+    const [notification] = await db
+      .update(notifications)
+      .set({ isRead: 1 })
+      .where(eq(notifications.id, id))
+      .returning();
+    return notification || undefined;
+  }
+
+  async markAllNotificationsAsRead(): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: 1 })
+      .where(eq(notifications.isRead, 0));
   }
 }
 

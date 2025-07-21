@@ -4,7 +4,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { storage } from "./storage";
-import { insertInvoiceSchema, insertItemSchema, insertAssignmentSchema } from "@shared/schema";
+import { insertInvoiceSchema, insertItemSchema, insertAssignmentSchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
 
 // Configure multer for file uploads
@@ -220,6 +220,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recentAssignments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch recent assignments" });
+    }
+  });
+
+  // Notification endpoints
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const notifications = await storage.getNotifications();
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread", async (req, res) => {
+    try {
+      const notifications = await storage.getUnreadNotifications();
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch unread notifications" });
+    }
+  });
+
+  app.post("/api/notifications", async (req, res) => {
+    try {
+      const result = insertNotificationSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ message: "Invalid notification data", errors: result.error.issues });
+      }
+      
+      const notification = await storage.createNotification(result.data);
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(id);
+      if (!notification) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+      await storage.markAllNotificationsAsRead();
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 
