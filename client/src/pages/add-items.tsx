@@ -204,17 +204,13 @@ export default function AddItems() {
                             <td className="px-4 py-3">
                               <div className="space-y-2">
                                 <Select
-                                  value={form.watch(`items.${index}.category`)}
+                                  value={defaultCategories.includes(form.watch(`items.${index}.category`)) ? form.watch(`items.${index}.category`) : ""}
                                   onValueChange={(value) => {
-                                    if (value === "custom") {
-                                      // Don't set value yet, let user type custom
-                                      return;
-                                    }
                                     form.setValue(`items.${index}.category`, value);
                                   }}
                                 >
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select or type custom..." />
+                                    <SelectValue placeholder="Select category..." />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {defaultCategories.map((category) => (
@@ -222,17 +218,21 @@ export default function AddItems() {
                                         {category}
                                       </SelectItem>
                                     ))}
-                                    <SelectItem value="custom">+ Add Custom Category</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <Input
                                   placeholder="Or type custom category..."
-                                  value={form.watch(`items.${index}.category`) && !defaultCategories.includes(form.watch(`items.${index}.category`)) ? form.watch(`items.${index}.category`) : ""}
+                                  value={!defaultCategories.includes(form.watch(`items.${index}.category`)) ? form.watch(`items.${index}.category`) : ""}
                                   onChange={(e) => {
                                     form.setValue(`items.${index}.category`, e.target.value);
                                   }}
                                   className="text-sm"
                                 />
+                                {form.formState.errors.items?.[index]?.category && (
+                                  <p className="text-sm text-red-600">
+                                    {form.formState.errors.items?.[index]?.category?.message}
+                                  </p>
+                                )}
                               </div>
                             </td>
                             <td className="px-4 py-3">
